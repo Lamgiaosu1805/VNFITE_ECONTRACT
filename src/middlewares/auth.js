@@ -15,7 +15,7 @@ const auth = {
     },
     verifyToken: (req, res, next) => {
         const token = req.headers.authorization
-        if(!token) {
+        if(token) {
             const SECRET_KEY = process.env.SECRET_KEY
             console.log(SECRET_KEY)
             next()

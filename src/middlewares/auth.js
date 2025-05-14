@@ -17,8 +17,15 @@ const auth = {
         const token = req.headers.authorization
         if(token) {
             const SECRET_KEY = process.env.SECRET_KEY
-            console.log(SECRET_KEY)
-            next()
+            if(req.bodysecretKey == SECRET_KEY) {
+                next()
+            }
+            else {
+                res.json({
+                    error_code: "3",
+                    message: "Thông tin không đúng",
+                })
+            }
         } else {
             res.json({
                 error_code: "2",

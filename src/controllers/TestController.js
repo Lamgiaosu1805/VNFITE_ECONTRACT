@@ -16,7 +16,9 @@ const TestController = {
                     status: "0"
                 }
             })
+            console.log("Call back thành công")
         } catch (error) {
+            console.log(error, "ERR")
             res.json({
                 error_code: "1",
                 message: error,

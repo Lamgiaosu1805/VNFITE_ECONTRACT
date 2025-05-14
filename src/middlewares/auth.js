@@ -27,6 +27,7 @@ const auth = {
                     error_code: "3",
                     message: "Thông tin không đúng",
                 })
+                console.log("THÔNG TIN KHÔNG ĐÚNG")
             }
         } else {
             res.json({

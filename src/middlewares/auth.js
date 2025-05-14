@@ -19,7 +19,7 @@ const auth = {
         console.log(req.body, " ABCCCC")
         if(token) {
             const SECRET_KEY = process.env.SECRET_KEY
-            if(req.bodysecretKey == SECRET_KEY) {
+            if(req.body.secretKey == SECRET_KEY) {
                 next()
             }
             else {

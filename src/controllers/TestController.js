@@ -7,7 +7,7 @@ const TestController = {
     },
     ssoCallback: (req, res) => {
         try {
-            const userId = "0326dde0-ac08-4455-a215-1e0bdd6eea70"
+            const userId = "e543d1fd-5a88-4369-baef-98947a485dbc"
             res.json({
                 error_code: "0",
                 message: "Thành công",

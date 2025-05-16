@@ -5,12 +5,13 @@ const { SuccessResponse, FailureResponse } = require("../utils/ResponseRequest")
 const TestController = {
     ssoCallback: async (req, res) => {
         try {
-            const userId = "e543d1fd-5a88-4369-baef-98947a485dbc"
+            const data = req.data
+            console.log(data)
             res.json({
                 error_code: "0",
                 message: "Thành công",
                 result: {
-                    userId: userId,
+                    userId: data.userId,
                     status: "0"
                 }
             })

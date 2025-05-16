@@ -28,18 +28,20 @@ const auth = {
                         message: "Thông tin không đúng",
                     })
                 }
-                const userId = "e543d1fd-5a88-4369-baef-98947a485dbc"
-                const accessToken = jwt.sign({
-                    userId: userId,
-                    contractId: "Lâm đẹp trai vl"
-                },
-                    process.env.SECRET_KEY,
-                    {
-                        expiresIn: "365d"
+                const accessToken = token.split(" ")[1];
+                jwt.verify(accessToken, process.env.SECRET_KEY, async (err, data) => {
+                    if(err) {
+                        console.log(err)
+                        res.json({
+                            error_code: "3",
+                            message: err,
+                        })
                     }
-                )
-                console.log(accessToken)
-                next()
+                    else {
+                        req.data = data;
+                        next()
+                    }
+                })
             } catch (error) {
                 console.log(error)
                 return res.json({

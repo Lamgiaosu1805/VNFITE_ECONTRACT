@@ -40,6 +40,18 @@ const TestController = {
         } catch (error) {
             res.json(FailureResponse("01", error))
         }
+    },
+    getTokenThirdPartyVNPT: async (req, res) => {
+        try {
+            const data = await getTokenVnpt.tokenUser()
+            await redis.set('tokenThirdPartyVnpt:TIKLUY', data.access_token, "EX", 3600 * 23)
+            res.json(SuccessResponse({
+                message: "Success",
+                data: data
+            }))
+        } catch (error) {
+            res.json(FailureResponse("02", error))
+        }
     }
 }
 

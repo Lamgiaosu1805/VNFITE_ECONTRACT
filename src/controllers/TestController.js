@@ -1,6 +1,6 @@
 const redis = require("../config/connectRedis")
 const getTokenVnpt = require("../utils/getTokenVnpt")
-const { SuccessResponse } = require("../utils/ResponseRequest")
+const { SuccessResponse, FailureResponse } = require("../utils/ResponseRequest")
 
 const TestController = {
     index: (req, res, next) => {
@@ -38,7 +38,7 @@ const TestController = {
                 data: data
             }))
         } catch (error) {
-            console.log(error)
+            res.json(FailureResponse("01", error))
         }
     }
 }

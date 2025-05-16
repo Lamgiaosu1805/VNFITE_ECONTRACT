@@ -3,12 +3,6 @@ const getTokenVnpt = require("../utils/getTokenVnpt")
 const { SuccessResponse, FailureResponse } = require("../utils/ResponseRequest")
 
 const TestController = {
-    index: (req, res, next) => {
-        res.json({
-            a: 1,
-            b: 2
-        })
-    },
     ssoCallback: async (req, res) => {
         try {
             const userId = "e543d1fd-5a88-4369-baef-98947a485dbc"

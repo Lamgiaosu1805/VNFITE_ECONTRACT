@@ -52,6 +52,7 @@ const auth = {
                 console.log(accessToken)
                 next()
             } catch (error) {
+                console.log(error)
                 return res.json({
                     error_code: "3",
                     message: error,

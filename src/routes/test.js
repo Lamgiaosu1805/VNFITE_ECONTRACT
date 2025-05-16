@@ -4,6 +4,7 @@ const auth = require('../middlewares/auth');
 const router = express.Router()
 
 router.get('/', TestController.index);
+router.get('/getTokenUserVNPT', TestController.getTokenUserVNPT);
 router.post('/ssoCallback', auth.verifyToken, TestController.ssoCallback);
 
 module.exports = router;

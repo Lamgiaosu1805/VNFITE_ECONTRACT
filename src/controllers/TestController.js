@@ -1,3 +1,7 @@
+const redis = require("../config/connectRedis")
+const getTokenVnpt = require("../utils/getTokenVnpt")
+const { SuccessResponse } = require("../utils/ResponseRequest")
+
 const TestController = {
     index: (req, res, next) => {
         res.json({
@@ -5,7 +9,7 @@ const TestController = {
             b: 2
         })
     },
-    ssoCallback: (req, res) => {
+    ssoCallback: async (req, res) => {
         try {
             const userId = "e543d1fd-5a88-4369-baef-98947a485dbc"
             res.json({
@@ -23,6 +27,18 @@ const TestController = {
                 error_code: "1",
                 message: error,
             })
+        }
+    },
+    getTokenUserVNPT: async (req, res) => {
+        try {
+            const data = await getTokenVnpt.tokenUser()
+            await redis.set('tokenUserVnpt:TIKLUY', data.access_token, "EX", 3600 * 23)
+            res.json(SuccessResponse({
+                message: "Success",
+                data: data
+            }))
+        } catch (error) {
+            console.log(error)
         }
     }
 }

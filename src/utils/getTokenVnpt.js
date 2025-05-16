@@ -2,7 +2,6 @@ const { default: axios } = require("axios")
 
 const getTokenVnpt = {
     tokenUser: async () => {
-        console.log(`${process.env.HOST_VNPT_ECONTRACT}/auth-service/oauth/token`)
         const response = await axios.post(`${process.env.HOST_VNPT_ECONTRACT}/auth-service/oauth/token`, {
             client_id: process.env.CLIENT_ID_VNPT_ECONTRACT,
             client_secret: process.env.CLIENT_SECRET_VNPT_ECONTRACT,

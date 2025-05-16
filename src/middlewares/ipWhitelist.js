@@ -1,4 +1,4 @@
-const ipWhitelist = ['14.224.135.196', '127.0.0.1']; // IP được phép
+const ipWhitelist = ['14.224.135.196', '::1']; // IP được phép
 
 function ipFilterMiddleware(req, res, next) {
     const clientIp = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress;

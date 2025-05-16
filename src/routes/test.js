@@ -6,7 +6,7 @@ const router = express.Router()
 
 router.get('/', TestController.index);
 router.get('/getTokenUserVNPT', ipFilterMiddleware, TestController.getTokenUserVNPT);
-router.get('/getTokenThirdPartyVNPT', TestController.getTokenThirdPartyVNPT);
-router.post('/ssoCallback', auth.verifyToken, TestController.ssoCallback);
+router.get('/getTokenThirdPartyVNPT', ipFilterMiddleware, TestController.getTokenThirdPartyVNPT);
+router.post('/ssoCallback', ipFilterMiddleware, auth.verifyToken, TestController.ssoCallback);
 
 module.exports = router;

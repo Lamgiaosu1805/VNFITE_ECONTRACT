@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken')
+const bcrypt = require('bcrypt')
 const PartnerModel = require('../models/PartnerModel')
 // const { FailureResponse } = require('../utils/ResponseRequest')
 // const AdminAccountModel = require('../models/AdminAccountModel')

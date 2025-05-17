@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const PartnerModel = require('../models/PartnerModel')
+const { FailureResponse } = require('../utils/ResponseRequest')
 
 const auth = {
     verifyPartner: async (req, res, next) => {
@@ -56,6 +57,25 @@ const auth = {
                 error_code: "2",
                 message: "Not Authenticated",
             })
+            console.log("Not Authenticated")
+        }
+    },
+    verifyTokenPartner: async (req, res, next) => {
+        const token = req.headers.authorization
+        if(token) {
+            const accessToken = token.split(" ")[1];
+            jwt.verify(accessToken, process.env.PARTNER_AUTH_KEY, async (err, data) => {
+                if(err) {
+                    console.log(err)
+                    res.json(FailureResponse("09", err))
+                }
+                else {
+                    req.data = data;
+                    next()
+                }
+            })
+        } else {
+            res.json(FailureResponse("08"))
             console.log("Not Authenticated")
         }
     }

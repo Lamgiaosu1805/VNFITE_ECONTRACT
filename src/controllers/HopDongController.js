@@ -1,9 +1,9 @@
 const { default: axios } = require("axios")
 const redis = require("../config/connectRedis")
-const { FailureResponse } = require("../utils/ResponseRequest")
+const { FailureResponse, SuccessResponse } = require("../utils/ResponseRequest")
 
 const HopDongController = {
-    renderChiTietHD: async (req, res) => {
+    renderHD: async (req, res) => {
         try {
             const userTokenVNPT = await redis.get('tokenUserVnpt:TIKLUY')
             const {templateId, fullname, cccd, hoKhauThuongTru, diaChiHienTai, soDienThoai, ngayKy, thangKy, namKy} = req.body
@@ -28,6 +28,27 @@ const HopDongController = {
             response.data.pipe(res);
         } catch (error) {
             res.json(FailureResponse("04", error))
+            console.log(error)
+        }
+    },
+    getChiTietHD: async (req, res) => {
+        try {
+            const {templateId} = req.params
+            const userTokenVNPT = await redis.get('tokenUserVnpt:TIKLUY')
+            const response = await axios.get(`${process.env.HOST_VNPT_ECONTRACT}/template-service/api/templates/v1/${templateId}/all-config`, {
+                headers: {
+                    Authorization: 'Bearer ' + userTokenVNPT
+                }
+            })
+            res.json(SuccessResponse({
+                message: "Success",
+                data: {
+                    templateFields: response.data.object.templateFields,
+                    templateName: response.data.object.templateName,
+                    templateId: templateId
+                }
+            }))
+        } catch (error) {
             console.log(error)
         }
     }

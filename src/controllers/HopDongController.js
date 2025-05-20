@@ -50,6 +50,7 @@ const HopDongController = {
             }))
         } catch (error) {
             console.log(error)
+            res.json(FailureResponse("10", error))
         }
     }
 }

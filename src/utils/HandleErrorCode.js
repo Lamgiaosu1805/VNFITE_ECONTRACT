@@ -18,6 +18,8 @@ const HandleErrorCode = (errorCode) => {
             return `Error: ${errorCode}, Not Authenticated`;
         case "09":
             return `Error: ${errorCode}, Token Invalid`;
+        case "10":
+            return `Error: ${errorCode}, Có lỗi khi lấy chi tiết hợp đồng`;
         default:
             return "Error: " + errorCode + ", Lỗi không xác định";
     }

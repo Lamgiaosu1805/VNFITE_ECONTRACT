@@ -5,7 +5,7 @@ const moment = require('moment-timezone')
 const LoaiHopDong = new Schema({
     title: { type: String, required: true },
     idHopDongMau: { type: String, required: true },
-    madeBy: { type: String, required: true },
+    madeBy: { type: String, required: true }, //VNFITE-CAPITAL || VNFITE || ...
     isDelete: { type: Boolean, default: false },
     createdAt: {
         type: String,

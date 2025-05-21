@@ -1,77 +1,0 @@
-[33mcommit dfb4872dddf2982dbeaa86ab09c9bb5494c900ba[m[33m ([m[1;31morigin/feature-add-contract[m[33m, [m[1;32mfeature-add-contract[m[33m)[m
-Author: vuvinh <vuthanhvinh0112@gmail.com>
-Date:   Wed May 21 10:13:19 2025 +0700
-
-    Thêm API tạo loại hợp đồng
-
-[1mdiff --git a/src/controllers/LoaiHopDongController.js b/src/controllers/LoaiHopDongController.js[m
-[1mnew file mode 100644[m
-[1mindex 0000000..e3d8cf6[m
-[1m--- /dev/null[m
-[1m+++ b/src/controllers/LoaiHopDongController.js[m
-[36m@@ -0,0 +1,25 @@[m
-[32m+[m[32mconst LoaiHopDong = require('../models/LoaiHopDongModel');[m[41m[m
-[32m+[m[32mconst { FailureResponse, SuccessResponse } = require("../utils/ResponseRequest")[m[41m[m
-[32m+[m[41m[m
-[32m+[m[32mconst createLoaiHopDong = async (req, res) => {[m[41m[m
-[32m+[m[32m    const { title, idHopDongMau, madeBy } = req.body;[m[41m[m
-[32m+[m[32m    if (!title || !idHopDongMau || !madeBy) {[m[41m[m
-[32m+[m[32m      return res.json(FailureResponse("08","Thiếu thông tin bắt buộc"));[m[41m[m
-[32m+[m[32m    }[m[41m[m
-[32m+[m[32m    const newLoaiHopDong = new LoaiHopDong({[m[41m[m
-[32m+[m[32m      title,[m[41m[m
-[32m+[m[32m      idHopDongMau,[m[41m[m
-[32m+[m[32m      madeBy[m[41m[m
-[32m+[m[32m    });[m[41m[m
-[32m+[m[32m    try {[m[41m[m
-[32m+[m[32m    await newLoaiHopDong.save();[m[41m[m
-[32m+[m[32m        return res.json(SuccessResponse({[m[41m[m
-[32m+[m[32m            message: "Tạo loại hợp đồng thành công",[m[41m[m
-[32m+[m[32m            data: newLoaiHopDong[m[41m[m
-[32m+[m[32m    }));[m[41m[m
-[32m+[m[32m  } catch (error) {[m[41m[m
-[32m+[m[32m    console.error(error);[m[41m[m
-[32m+[m[32m    return res.json(FailureResponse("09", "Lỗi khi tạo loại hợp đồng"));[m[41m[m
-[32m+[m[32m  }[m[41m[m
-[32m+[m[32m};[m[41m[m
-[32m+[m[32mmodule.exports = {createLoaiHopDong};[m
-\ No newline at end of file[m
-[1mdiff --git a/src/routes/hopDong.js b/src/routes/hopDong.js[m
-[1mindex 0e0c581..4851eb2 100644[m
-[1m--- a/src/routes/hopDong.js[m
-[1m+++ b/src/routes/hopDong.js[m
-[36m@@ -2,9 +2,9 @@[m [mconst express = require('express');[m
- const HopDongController = require('../controllers/HopDongController');[m
- const auth = require('../middlewares/auth');[m
- const ipFilterMiddleware = require('../middlewares/ipWhitelist');[m
-[31m-const router = express.Router()[m
-[31m-[m
-[32m+[m[32mconst router = express.Router();[m
-[32m+[m[32mconst { createLoaiHopDong } = require('../controllers/LoaiHopDongController');[m
- router.post('/renderHDPreview', auth.verifyTokenPartner, HopDongController.renderHD);[m
- router.get('/chiTietHopHong/:templateId', auth.verifyTokenPartner, HopDongController.getChiTietHD);[m
-[31m-[m
-[32m+[m[32mrouter.post('/loaiHopDong', createLoaiHopDong);[m
- module.exports = router;[m
-\ No newline at end of file[m
-[1mdiff --git a/src/routes/index.js b/src/routes/index.js[m
-[1mindex b6b9d65..cfc6403 100644[m
-[1m--- a/src/routes/index.js[m
-[1m+++ b/src/routes/index.js[m
-[36m@@ -2,12 +2,14 @@[m [mconst testRouter = require('./test')[m
- const authRouter = require('./auth')[m
- const partnerRouter = require('./partner')[m
- const hopDongRouter = require('./hopDong')[m
-[31m-[m
-[32m+[m[32mconst loaihopDongRouter = require('./hopDong')[m
- const route = (app) => {[m
-     app.use(`/test`, testRouter)[m
-     app.use(`/auth`, authRouter)[m
-     app.use(`/partner`, partnerRouter)[m
-     app.use(`/hopDong`, hopDongRouter)[m
-[32m+[m[32m    app.use(`/loaihopDong`, loaihopDongRouter)[m
- }[m
- [m
-[32m+[m
- module.exports = route;[m
-\ No newline at end of file[m

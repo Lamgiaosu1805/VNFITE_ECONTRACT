@@ -20,6 +20,10 @@ const HandleErrorCode = (errorCode) => {
             return `Error: ${errorCode}, Token Invalid`;
         case "10":
             return `Error: ${errorCode}, Có lỗi khi lấy chi tiết hợp đồng`;
+        case "11":
+            return `Error: ${errorCode}, Có lỗi khi ký hợp đồng`;
+        case "12":
+            return `Error: ${errorCode}, Có lỗi khi ký xác thực OTP`;
         default:
             return "Error: " + errorCode + ", Lỗi không xác định";
     }

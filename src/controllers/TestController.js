@@ -38,7 +38,7 @@ const TestController = {
     },
     getTokenThirdPartyVNPT: async (req, res) => {
         try {
-            const data = await getTokenVnpt.tokenUser()
+            const data = await getTokenVnpt.tokenThirdParty()
             await redis.set('tokenThirdPartyVnpt:TIKLUY', data.access_token, "EX", 3600 * 23)
             res.json(SuccessResponse({
                 message: "Success",

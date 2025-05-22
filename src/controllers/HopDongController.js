@@ -1,12 +1,17 @@
 const { default: axios } = require("axios")
 const redis = require("../config/connectRedis")
 const { FailureResponse, SuccessResponse } = require("../utils/ResponseRequest")
+const FormData = require('form-data');
+const jwt = require('jsonwebtoken')
+const path = require('path');
+const fs = require('fs');
 
 const HopDongController = {
     renderHD: async (req, res) => {
         try {
             const userTokenVNPT = await redis.get('tokenUserVnpt:TIKLUY')
-            const {templateId, fullname, cccd, hoKhauThuongTru, diaChiHienTai, soDienThoai, ngayKy, thangKy, namKy} = req.body
+            const thirdPartyTokenVNPT = await redis.get('tokenThirdPartyVnpt:TIKLUY')
+            const {templateId, fullname, cccd, hoKhauThuongTru, diaChiHienTai, soDienThoai, ngayKy, thangKy, namKy, email, ngaySinh, gioiTinh, ngayCapCCCD, noiCap} = req.body
             const response = await axios.post(`${process.env.HOST_VNPT_ECONTRACT}/template-service/api/templates/${templateId}/render`, {
                 "${fullname}": fullname,
                 "${cccd}": cccd,
@@ -23,12 +28,78 @@ const HopDongController = {
                 },
                 responseType: 'stream'
             })
+            const chunks = [];
+            for await (const chunk of response.data) {
+                chunks.push(chunk);
+            }
+            const pdfBuffer = Buffer.concat(chunks);
+
+            // SETUP FORM-DATA
+            const files = req.files;       
+            const fields = ''
+            const customer = {
+                username: soDienThoai,
+                userType: "CONSUMER",
+                sdt: soDienThoai,
+                email: email,
+                hoten: fullname,
+                sogiayto: cccd,
+                ngaySinh: ngaySinh, //dạng dd/mm/yyyy
+                gioiTinhId: gioiTinh, // Nam 2; Nữ 1
+                ngayCap: ngayCapCCCD,
+                noiCap: noiCap
+            }
+            const contract = {
+                verificationType: "NONE",
+                sequence: 1,
+                signForm: ["NO_AUTHEN", "OTP_EMAIL", "OTP"],
+                title: "Hợp đồng hợp tác đầu tư",
+                signFlow: []
+            }
+            const formData = new FormData();
+            formData.append('file', pdfBuffer, {
+                filename: 'hopdong_render.pdf',
+                contentType: 'application/pdf'
+            });
+            formData.append('EKYC_CHANDUNG', files.portrait[0].buffer, {
+                filename: files.portrait[0].originalname,
+                contentType: files.portrait[0].mimetype
+            });
+          
+            formData.append('EKYC_MATTRUOC', files.cccd_front[0].buffer, {
+                filename: files.cccd_front[0].originalname,
+                contentType: files.cccd_front[0].mimetype
+            });
+          
+            formData.append('EKYC_MATSAU', files.cccd_back[0].buffer, {
+                filename: files.cccd_back[0].originalname,
+                contentType: files.cccd_back[0].mimetype
+            });
+            formData.append('fields', JSON.stringify(fields));
+            formData.append('customer', JSON.stringify(customer));
+            formData.append('contract', JSON.stringify(contract));
+            
+            const responseTaoHD = await axios.post(`${process.env.HOST_VNPT_ECONTRACT}/esolution-service/contracts/create-draft-from-file-and-identification-v2`,
+                formData,
+                {
+                    headers: {
+                        Authorization: 'Bearer ' + thirdPartyTokenVNPT
+                    }
+                }
+            )
+            
+            const data = {
+                userId: responseTaoHD.data.object.partnerId,
+                contractId: responseTaoHD.data.object.contractId
+            }
+            console.log(`econtract:${soDienThoai}:${cccd}`)
+            await redis.set(`econtract:${soDienThoai}:${cccd}`, JSON.stringify(data), "EX", 3600 * 23)
             res.setHeader('Content-Type', response.headers['content-type']);
             res.setHeader('Content-Disposition', response.headers['content-disposition'] || 'inline');
-            response.data.pipe(res);
+            res.send(pdfBuffer);
         } catch (error) {
             res.json(FailureResponse("04", error))
-            console.log(error)
+            console.log(error.message)
         }
     },
     getChiTietHD: async (req, res) => {
@@ -50,6 +121,143 @@ const HopDongController = {
             }))
         } catch (error) {
             console.log(error)
+            res.json(FailureResponse("10", error))
+        }
+    },
+    kyHopDong: async(req, res) => {
+        try {
+            const {cccd, soDienThoai} = req.body
+            const dataHopDong = JSON.parse(await redis.get(`econtract:${soDienThoai}:${cccd}`))
+            const thirdPartyTokenVNPT = await redis.get('tokenThirdPartyVnpt:TIKLUY')
+            if(!dataHopDong) {
+                return res.json(FailureResponse("11", "Hợp đồng không tồn tại"))
+            }
+            try {
+                const responseGuiHD = await axios.post(`${process.env.HOST_VNPT_ECONTRACT}/esolution-service/contracts/${dataHopDong.contractId}/submit-contract`, null, {
+                    headers: {
+                        Authorization: 'Bearer ' + thirdPartyTokenVNPT
+                    }
+                })
+            } catch (error) {
+                console.log(error)
+                console.log("Hợp đồng đã được gửi")
+            }
+            const serviceToken = jwt.sign(dataHopDong,
+                process.env.SECRET_KEY,
+                {
+                    expiresIn: "1d"
+                }
+            )
+            const responseSSO = await axios.post(`${process.env.HOST_VNPT_ECONTRACT}/auth-service/sso/exchange-token`, {
+                client_id: process.env.CLIENT_ID_VNPT_ECONTRACT,
+                client_secret: process.env.CLIENT_SECRET_VNPT_ECONTRACT,
+                token: serviceToken
+            })
+            const responseYcOTP = await axios.post(`${process.env.HOST_VNPT_ECONTRACT}/esolution-service/contracts/${dataHopDong.contractId}/electronic-sign?signForm=OTP_EMAIL`, null, {
+                headers: {
+                    Authorization: 'Bearer ' + responseSSO.data.access_token
+                }
+            })
+            const dataSSO = {
+                idSign: responseYcOTP.data.object.idSign,
+                accessTokenSSO: responseSSO.data.access_token,
+                contractId: dataHopDong.contractId
+            }
+            await redis.set(`econtract:${soDienThoai}:${cccd}:dataSSO`, JSON.stringify(dataSSO), "EX", 3600)
+            res.json(SuccessResponse({
+                message: "OTP đã được gửi"
+            }))
+        } catch (error) {
+            console.log(error)
+            res.json(FailureResponse("11", error))
+        }
+    },
+    validateOTP: async (req, res) => {
+        try {
+            const {otp, soDienThoai, cccd} = req.body
+            const dataSSO = JSON.parse(await redis.get(`econtract:${soDienThoai}:${cccd}:dataSSO`))
+            const thirdPartyTokenVNPT = await redis.get('tokenThirdPartyVnpt:TIKLUY')
+            console.log(dataSSO.idSign)
+            console.log(otp)
+            const responseValidateOTP = await axios.post(`${process.env.HOST_VNPT_ECONTRACT}/esignature-service/esign/${dataSSO.idSign}/verify`, {
+                otp: otp
+            }, {
+                headers: {
+                    Authorization: 'Bearer ' + dataSSO.accessTokenSSO
+                }
+            })
+            const data = responseValidateOTP.data
+            if(data.status == "OK") {
+                const multiSign = [
+                    {
+                        "pageSign": 17,
+                        "bboxSign": [
+                            359.45700026,
+                            326.43500961999996,
+                            597.55700026,
+                            426.43500961999996
+                        ]
+                    }
+                ]
+                const formData = new FormData();
+                const imagePath = path.join(__dirname, '..', '..', 'IMG_5492.png');
+                formData.append('signImg1', fs.createReadStream(imagePath), {
+                    filename: 'IMG_5492.png',
+                    contentType: 'image/jpeg' // hoặc 'image/png' nếu ảnh PNG
+                });
+                formData.append('multiSign', JSON.stringify(multiSign));
+                formData.append('otpCode', "N");
+                formData.append('emailOrPhonenumber', "N");
+                const responseSign = await axios.post(`${process.env.HOST_VNPT_ECONTRACT}/esignature-service/esign/${dataSSO.idSign}/sign-by-userId`,
+                    formData,
+                    {
+                        headers: {
+                            Authorization: "Bearer " + dataSSO.accessTokenSSO
+                        },
+                        responseType: 'stream'
+                    }
+                )
+                if(responseSign.status == 200) {
+                    const chunks = [];
+                    for await (const chunk of responseSign.data) {
+                        chunks.push(chunk);
+                    }
+                    const pdfBuffer = Buffer.concat(chunks);
+                    const data = {
+                        "SignForm": "EMAIL_OTP",
+                        "name": "Nghiêm Khắc Lâm",
+                        "signType": "APPROVAL"
+                    }
+                    const formData = new FormData();
+                    formData.append('file', pdfBuffer, {
+                        filename: 'hopdong_render.pdf',
+                        contentType: 'application/pdf'
+                    });
+                    formData.append('data', JSON.stringify(data));
+
+                    const responseUpdateSign = await axios.post(`${process.env.HOST_VNPT_ECONTRACT}/esolution-service/contracts/${dataSSO.contractId}/digital-sign`, 
+                        formData,
+                        {
+                            headers: {
+                                Authorization: "Bearer " + dataSSO.accessTokenSSO
+                            }
+                        }
+                    )
+                    console.log(responseUpdateSign.data, "ABC")
+                    res.setHeader('Content-Type', responseSign.headers['content-type']);
+                    res.setHeader('Content-Disposition', responseSign.headers['content-disposition'] || 'inline');
+                    res.send(pdfBuffer);
+                }
+                else {
+                    res.json(FailureResponse("12", "Có lỗi khi tạo hợp đồng"))
+                    console.log(responseSign.data)
+                }
+            } else {
+                res.json(FailureResponse("12", "OTP Không tồn tại"))
+            }
+        } catch (error) {
+            console.log(error.response?.data || error)
+            res.json(FailureResponse("12", error))
         }
     }
 }

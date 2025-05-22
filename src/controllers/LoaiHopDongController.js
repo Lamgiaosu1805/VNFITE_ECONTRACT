@@ -27,4 +27,4 @@ const LoaiHopDongController = {
     }
 };
 
-module.exports = LoaiHopDongController;
+module.exports = LoaiHopDongController; 

@@ -6,8 +6,7 @@ const LoaiHopDongController = require('../controllers/LoaiHopDongController')
 const upload = require('../middlewares/uploadMiddleware');
 
 const router = express.Router();
-const { createLoaiHopDong } = require('../controllers/LoaiHopDongController');
-
+ 
 router.post('/renderHDPreview', auth.verifyTokenPartner, upload.fields([
     { name: 'portrait', maxCount: 1 },
     { name: 'cccd_front', maxCount: 1 },

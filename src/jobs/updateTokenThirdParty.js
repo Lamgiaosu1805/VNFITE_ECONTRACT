@@ -3,7 +3,7 @@ const getTokenVnpt = require('../utils/getTokenVnpt');
 const redis = require('../config/connectRedis');
 
 module.exports = () => {
-    cron.schedule('*/10 * * * *', async () => {
+    cron.schedule('0 */6 * * *', async () => {
         try {
             const data = await getTokenVnpt.tokenThirdParty()
             await redis.set('tokenThirdPartyVnpt:TIKLUY', data.access_token, "EX", 3600 * 23)

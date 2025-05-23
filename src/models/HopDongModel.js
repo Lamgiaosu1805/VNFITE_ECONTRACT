@@ -4,7 +4,8 @@ const moment = require('moment-timezone')
 
 const HopDong = new Schema({
     idHopDong: { type: String, required: true, unique: true },
-    idCustomer: { type: String, required: true },
+    cccd: { type: String, required: true },
+    soDienThoai: { type: String, required: true },
     idLoaiHopDong: { type: String, required: true },
     isDelete: { type: Boolean, default: false },
     createdAt: {

@@ -54,7 +54,27 @@ const HopDongController = {
                 sequence: 1,
                 signForm: ["NO_AUTHEN", "OTP_EMAIL", "OTP"],
                 title: "Hợp đồng hợp tác đầu tư",
-                signFlow: []
+                flowTemplateId: "6eead43c-ceb6-4abc-b260-1acb10a7c5c6",
+                signFlow: [
+                    {
+                        signType: "APPROVAL",
+                        signForm: [
+                            "SMART_CA"
+                        ],
+                        signFrame: [
+                            {
+                                x: 41,
+                                y: 426,
+                                w: 279 - 41,
+                                h: 426 - 326,
+                                page: 18
+                            }
+                        ],
+                        sequence: 1,
+                        userId: "6b94a6f9-222f-4cac-8be0-bb78ad8a49ff",
+                        limitDate: 2
+                    }
+                ]
             }
             const formData = new FormData();
             formData.append('file', pdfBuffer, {
@@ -99,7 +119,7 @@ const HopDongController = {
             res.send(pdfBuffer);
         } catch (error) {
             res.json(FailureResponse("04", error))
-            console.log(error.message)
+            console.log(error.response?.data || error)
         }
     },
     getChiTietHD: async (req, res) => {
@@ -176,8 +196,6 @@ const HopDongController = {
         try {
             const {otp, soDienThoai, cccd} = req.body
             const dataSSO = JSON.parse(await redis.get(`econtract:${soDienThoai}:${cccd}:dataSSO`))
-            const thirdPartyTokenVNPT = await redis.get('tokenThirdPartyVnpt:TIKLUY')
-            console.log(dataSSO.idSign)
             console.log(otp)
             const responseValidateOTP = await axios.post(`${process.env.HOST_VNPT_ECONTRACT}/esignature-service/esign/${dataSSO.idSign}/verify`, {
                 otp: otp
@@ -192,10 +210,10 @@ const HopDongController = {
                     {
                         "pageSign": 17,
                         "bboxSign": [
-                            359.45700026,
-                            326.43500961999996,
-                            597.55700026,
-                            426.43500961999996
+                            359,
+                            326,
+                            597,
+                            450
                         ]
                     }
                 ]
@@ -224,7 +242,7 @@ const HopDongController = {
                     }
                     const pdfBuffer = Buffer.concat(chunks);
                     const data = {
-                        "SignForm": "EMAIL_OTP",
+                        "SignForm": "SMART_CA",
                         "name": "Nghiêm Khắc Lâm",
                         "signType": "APPROVAL"
                     }
@@ -234,7 +252,7 @@ const HopDongController = {
                         contentType: 'application/pdf'
                     });
                     formData.append('data', JSON.stringify(data));
-
+                    console.log(`${process.env.HOST_VNPT_ECONTRACT}/esolution-service/contracts/${dataSSO.contractId}/digital-sign`, "ID HĐ")
                     const responseUpdateSign = await axios.post(`${process.env.HOST_VNPT_ECONTRACT}/esolution-service/contracts/${dataSSO.contractId}/digital-sign`, 
                         formData,
                         {
@@ -246,7 +264,12 @@ const HopDongController = {
                     console.log(responseUpdateSign.data, "ABC")
                     res.setHeader('Content-Type', responseSign.headers['content-type']);
                     res.setHeader('Content-Disposition', responseSign.headers['content-disposition'] || 'inline');
-                    res.send(pdfBuffer);
+                    res.json(SuccessResponse({
+                        message: "Ký hợp đồng thành công",
+                        data: {
+                            contractId: responseUpdateSign.data.object.contractId
+                        }
+                    }))
                 }
                 else {
                     res.json(FailureResponse("12", "Có lỗi khi tạo hợp đồng"))

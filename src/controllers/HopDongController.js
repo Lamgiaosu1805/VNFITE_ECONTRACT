@@ -212,10 +212,10 @@ const HopDongController = {
                     {
                         "pageSign": 17,
                         "bboxSign": [
-                            359,
-                            326,
-                            597,
-                            450
+                            359 + 50,
+                            289,
+                            597 - 50,
+                            440
                         ]
                     }
                 ]
@@ -272,8 +272,8 @@ const HopDongController = {
                         }
                     )
                     // console.log(responseUpdateSign.data, "ABC")
-                    res.setHeader('Content-Type', responseSign.headers['content-type']);
-                    res.setHeader('Content-Disposition', responseSign.headers['content-disposition'] || 'inline');
+                    // res.setHeader('Content-Type', responseSign.headers['content-type']);
+                    // res.setHeader('Content-Disposition', responseSign.headers['content-disposition'] || 'inline');
                     res.json(SuccessResponse({
                         message: "Ký hợp đồng thành công",
                         data: {

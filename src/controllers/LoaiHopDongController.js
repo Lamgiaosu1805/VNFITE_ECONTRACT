@@ -22,7 +22,7 @@ const LoaiHopDongController = {
             }));
         } catch (error) {
             console.error(error);
-            res.json(FailureResponse("14", "Lỗi khi tạo loại hợp đồng"));
+            res.json(FailureResponse("14", error));
         }
     }
 };

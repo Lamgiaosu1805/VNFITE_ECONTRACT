@@ -6,6 +6,7 @@ const HopDong = new Schema({
     idHopDong: { type: String, required: true, unique: true },
     cccd: { type: String, required: true },
     soDienThoai: { type: String, required: true },
+    fullname: { type: String, required: true },
     idLoaiHopDong: { type: String, required: true },
     isDelete: { type: Boolean, default: false },
     createdAt: {

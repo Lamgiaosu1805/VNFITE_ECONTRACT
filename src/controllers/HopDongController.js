@@ -5,6 +5,7 @@ const FormData = require('form-data');
 const jwt = require('jsonwebtoken')
 const path = require('path');
 const fs = require('fs');
+const HopDongModel = require("../models/HopDongModel");
 
 const HopDongController = {
     renderHD: async (req, res) => {
@@ -110,15 +111,15 @@ const HopDongController = {
             
             const data = {
                 userId: responseTaoHD.data.object.partnerId,
-                contractId: responseTaoHD.data.object.contractId
+                contractId: responseTaoHD.data.object.contractId,
+                fullname: fullname
             }
-            console.log(`econtract:${soDienThoai}:${cccd}`)
             await redis.set(`econtract:${soDienThoai}:${cccd}`, JSON.stringify(data), "EX", 3600 * 23)
             res.setHeader('Content-Type', response.headers['content-type']);
             res.setHeader('Content-Disposition', response.headers['content-disposition'] || 'inline');
             res.send(pdfBuffer);
         } catch (error) {
-            res.json(FailureResponse("04", error))
+            res.json(FailureResponse("04", error.response?.data || error))
             console.log(error.response?.data || error)
         }
     },
@@ -181,15 +182,16 @@ const HopDongController = {
             const dataSSO = {
                 idSign: responseYcOTP.data.object.idSign,
                 accessTokenSSO: responseSSO.data.access_token,
-                contractId: dataHopDong.contractId
+                contractId: dataHopDong.contractId,
+                fullname: dataHopDong.fullname
             }
             await redis.set(`econtract:${soDienThoai}:${cccd}:dataSSO`, JSON.stringify(dataSSO), "EX", 3600)
             res.json(SuccessResponse({
                 message: "OTP đã được gửi"
             }))
         } catch (error) {
-            console.log(error)
-            res.json(FailureResponse("11", error))
+            console.log(error.response?.data || error)
+            res.json(FailureResponse("11", error.response?.data || error))
         }
     },
     validateOTP: async (req, res) => {
@@ -236,6 +238,14 @@ const HopDongController = {
                     }
                 )
                 if(responseSign.status == 200) {
+                    const newHopDong = new HopDongModel({
+                        cccd: cccd,
+                        soDienThoai: soDienThoai,
+                        fullname: dataSSO.fullname,
+                        idLoaiHopDong: "682fd19c2a1664686b259b29",
+                        idHopDong: dataSSO.contractId
+                    })
+                    await newHopDong.save()
                     const chunks = [];
                     for await (const chunk of responseSign.data) {
                         chunks.push(chunk);
@@ -261,7 +271,7 @@ const HopDongController = {
                             }
                         }
                     )
-                    console.log(responseUpdateSign.data, "ABC")
+                    // console.log(responseUpdateSign.data, "ABC")
                     res.setHeader('Content-Type', responseSign.headers['content-type']);
                     res.setHeader('Content-Disposition', responseSign.headers['content-disposition'] || 'inline');
                     res.json(SuccessResponse({
@@ -280,7 +290,7 @@ const HopDongController = {
             }
         } catch (error) {
             console.log(error.response?.data || error)
-            res.json(FailureResponse("12", error))
+            res.json(FailureResponse("12", error.response?.data || error))
         }
     }
 }

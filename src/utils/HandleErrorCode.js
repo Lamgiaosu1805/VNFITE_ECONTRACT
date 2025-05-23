@@ -24,6 +24,10 @@ const HandleErrorCode = (errorCode) => {
             return `Error: ${errorCode}, Có lỗi khi ký hợp đồng`;
         case "12":
             return `Error: ${errorCode}, Có lỗi khi ký xác thực OTP`;
+        case "13":
+            return `Error: ${errorCode}, Thiếu thông tin`;
+        case "14":
+            return `Error: ${errorCode}, Lỗi khi tạo loại hợp đồng`;
         default:
             return "Error: " + errorCode + ", Lỗi không xác định";
     }

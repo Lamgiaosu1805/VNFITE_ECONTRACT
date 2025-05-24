@@ -12,8 +12,8 @@ router.post('/renderHDPreview', auth.verifyTokenPartner, upload.fields([
     { name: 'cccd_front', maxCount: 1 },
     { name: 'cccd_back', maxCount: 1 },
 ]), HopDongController.renderHD);
-router.post('/kyHopDong', HopDongController.kyHopDong);
-router.post('/validateOTP', HopDongController.validateOTP);
+router.post('/kyHopDong', auth.verifyTokenPartner, HopDongController.kyHopDong);
+router.post('/validateOTP', auth.verifyTokenPartner, HopDongController.validateOTP);
 router.post('/renderHDPreview', auth.verifyTokenPartner, HopDongController.renderHD);
 router.get('/chiTietHopHong/:templateId', auth.verifyTokenPartner, HopDongController.getChiTietHD);
 router.post('/createLoaiHopDong', ipFilterMiddleware, LoaiHopDongController.createLoaiHopDong);

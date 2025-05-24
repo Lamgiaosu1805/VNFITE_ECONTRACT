@@ -9,6 +9,7 @@ const HopDongModel = require("../models/HopDongModel");
 
 const HopDongController = {
     renderHD: async (req, res) => {
+        console.log("request body: ", req.body)
         try {
             const userTokenVNPT = await redis.get('tokenUserVnpt:TIKLUY')
             const thirdPartyTokenVNPT = await redis.get('tokenThirdPartyVnpt:TIKLUY')

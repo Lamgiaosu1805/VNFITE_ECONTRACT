@@ -120,7 +120,7 @@ const HopDongController = {
             res.setHeader('Content-Disposition', response.headers['content-disposition'] || 'inline');
             res.send(pdfBuffer);
         } catch (error) {
-            res.json(FailureResponse("04", error.response?.data || error))
+            res.status(400).json(FailureResponse("04", error.response?.data || error))
             console.log(error.response?.data || error)
         }
     },
@@ -291,7 +291,7 @@ const HopDongController = {
             }
         } catch (error) {
             console.log(error.response?.data || error)
-            res.status(400).json(FailureResponse("12", error.response?.data || error))
+            res.json(FailureResponse("12", error.response?.data || error))
         }
     }
 }

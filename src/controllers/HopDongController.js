@@ -291,7 +291,7 @@ const HopDongController = {
             }
         } catch (error) {
             console.log(error.response?.data || error)
-            res.json(FailureResponse("12", error.response?.data || error))
+            res.status(400).json(FailureResponse("12", error.response?.data || error))
         }
     }
 }

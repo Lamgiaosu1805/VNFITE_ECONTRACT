@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken')
 const path = require('path');
 const fs = require('fs');
 const HopDongModel = require("../models/HopDongModel");
+const { processHopDongChuaTai } = require("../services/contract");
 
 const HopDongController = {
     renderHD: async (req, res) => {
@@ -296,80 +297,11 @@ const HopDongController = {
     },
     taiHopDong: async (req, res) => {
         try {
-            const userTokenVNPT = await redis.get('tokenUserVnpt:TIKLUY')
-            const thirdPartyTokenVNPT = await redis.get('tokenThirdPartyVnpt:TIKLUY')
-            const hopDongChuaTai = await HopDongModel.find({idFile: ""})
-            if(hopDongChuaTai.length == 0) {
-                return res.json(SuccessResponse({
-                    message: "success",
-                    data: hopDongChuaTai
-                }))
-            }
-            else {
-                const errors = [];
-                const success = [];
-                for (const hopDong of hopDongChuaTai) {
-                    try {
-                        console.log(`🔄 Processing contract: ${hopDong.idHopDong}`);
-                
-                        const chiTietHDRes = await axios.get(`${process.env.HOST_VNPT_ECONTRACT}/esolution-service/contracts/${hopDong.idHopDong}`, {
-                            headers: {
-                                Authorization: 'Bearer ' + userTokenVNPT
-                            }
-                        });
-                        const downloadHDRes = await axios.get(`${process.env.HOST_VNPT_ECONTRACT}/esignature-service/dsign/esolution/download?contractId=${hopDong.idHopDong}&documentType=CONTRACT&documentHash=${chiTietHDRes.data.object.documentHash}`, {
-                            headers: {
-                                Authorization: 'Bearer ' + userTokenVNPT
-                            },
-                            responseType: 'stream'
-                        });
-                        const chunks = [];
-                        for await (const chunk of downloadHDRes.data) {
-                            chunks.push(chunk);
-                        }
-                        const pdfBuffer = Buffer.concat(chunks);
-                        const mappings = [{
-                            idHopDong: hopDong.idHopDong
-                        }]
-                        const formData = new FormData();
-                        formData.append('files', pdfBuffer, {
-                            filename: 'hopdong_render.pdf',
-                            contentType: 'application/pdf'
-                        });
-                        formData.append('mappings', JSON.stringify(mappings));
-                        const getIdFileRes = await axios.post(`https://service.vnfite.com.vn/file-manager/v2/upload`, formData);
-                
-                        // // ✅ Cập nhật hợp đồng
-                        await HopDongModel.updateOne(
-                            { idHopDong: hopDong.idHopDong },
-                            { $set: { idFile: getIdFileRes.data.files[0].fileId} }
-                        );
-                
-                        success.push({
-                            contractId: hopDong.idHopDong,
-                            idFile: getIdFileRes.data.files[0].fileId
-                        });
-                    } catch (err) {
-                        console.error(`❌ Failed contract ${hopDong.idHopDong}:`, err.message);
-                        errors.push({
-                            contractId: hopDong.idHopDong,
-                            error: err.message,
-                        });
-                    }
-                }
-                return res.json({
-                    success: errors.length === 0,
-                    updated: success.length,
-                    failed: errors.length,
-                    details: {
-                        success,
-                        errors,
-                    }
-                });
-            }
+            const result = await processHopDongChuaTai();
+            res.json(SuccessResponse({ message: "Success", ...result }));
         } catch (error) {
-            console.log(error.response?.data || error)
-            res.json(FailureResponse("15", error.response?.data || error))
+            console.error("❌ API error:", error);
+            res.json(FailureResponse("15", error.message));
         }
     },
     showHopDong: async (req, res) => {

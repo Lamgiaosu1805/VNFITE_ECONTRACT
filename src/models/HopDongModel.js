@@ -9,6 +9,7 @@ const HopDong = new Schema({
     fullname: { type: String, required: true },
     idLoaiHopDong: { type: String, required: true },
     isDelete: { type: Boolean, default: false },
+    idFile: { type: String, unique: true },
     createdAt: {
         type: String,
         default: () => moment.tz(Date.now(), 'Asia/Ho_Chi_Minh').format(), // Tự động lưu với múi giờ +7

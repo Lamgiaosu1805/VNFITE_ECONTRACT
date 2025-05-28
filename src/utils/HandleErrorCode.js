@@ -30,6 +30,8 @@ const HandleErrorCode = (errorCode) => {
             return `Error: ${errorCode}, Lỗi khi tạo loại hợp đồng`;
         case "15":
             return `Error: ${errorCode}, Có lỗi khi tải hợp đồng`;
+        case "16":
+            return `Error: ${errorCode}, Có lỗi khi show`;
         default:
             return "Error: " + errorCode + ", Lỗi không xác định";
     }

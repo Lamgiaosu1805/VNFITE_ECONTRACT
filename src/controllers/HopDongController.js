@@ -371,6 +371,31 @@ const HopDongController = {
             console.log(error.response?.data || error)
             res.json(FailureResponse("15", error.response?.data || error))
         }
+    },
+    showHopDong: async (req, res) => {
+        try {
+            const {cccd, sdt} = req.body
+            const hopDong = await HopDongModel.findOne({cccd, soDienThoai: sdt, idLoaiHopDong: "682fd19c2a1664686b259b29"}).sort({ createdAt: -1 })
+            if(hopDong) {
+                const response = await axios.get(`https://service.vnfite.com.vn/file-manager/v2/file/${hopDong.idFile}`, {
+                    responseType: 'stream'
+                })
+                const chunks = [];
+                for await (const chunk of response.data) {
+                    chunks.push(chunk);
+                }
+                const pdfBuffer = Buffer.concat(chunks);
+                res.setHeader('Content-Type', response.headers['content-type']);
+                res.setHeader('Content-Disposition', response.headers['content-disposition'] || 'inline');
+                res.send(pdfBuffer);
+            }
+            else {
+                res.status(400).json(FailureResponse("16", "Hợp đồng không tồn tại"))
+            }
+        } catch (error) {
+            console.log(error.response?.data || error)
+            res.status(400).json(FailureResponse("16", error.response?.data || error))
+        }
     }
 }
 

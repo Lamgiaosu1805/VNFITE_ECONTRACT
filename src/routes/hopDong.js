@@ -17,5 +17,6 @@ router.post('/validateOTP', auth.verifyTokenPartner, HopDongController.validateO
 router.post('/renderHDPreview', auth.verifyTokenPartner, HopDongController.renderHD);
 router.get('/chiTietHopHong/:templateId', auth.verifyTokenPartner, HopDongController.getChiTietHD);
 router.post('/createLoaiHopDong', ipFilterMiddleware, LoaiHopDongController.createLoaiHopDong);
+router.get('/taiHopDong', auth.verifyTokenPartner, HopDongController.taiHopDong);
 
 module.exports = router;

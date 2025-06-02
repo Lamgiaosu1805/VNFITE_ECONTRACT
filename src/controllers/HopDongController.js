@@ -222,9 +222,9 @@ const HopDongController = {
                     }
                 ]
                 const formData = new FormData();
-                const imagePath = path.join(__dirname, '..', '..', 'tickSigned.png');
+                const imagePath = path.join(__dirname, '..', '..', 'signed.png');
                 formData.append('signImg1', fs.createReadStream(imagePath), {
-                    filename: 'IMG_5492.png',
+                    filename: 'signed.png',
                     contentType: 'image/jpeg' // hoặc 'image/png' nếu ảnh PNG
                 });
                 formData.append('multiSign', JSON.stringify(multiSign));

@@ -222,7 +222,7 @@ const HopDongController = {
                     }
                 ]
                 const formData = new FormData();
-                const imagePath = path.join(__dirname, '..', '..', 'IMG_5492.png');
+                const imagePath = path.join(__dirname, '..', '..', 'tickSigned.png');
                 formData.append('signImg1', fs.createReadStream(imagePath), {
                     filename: 'IMG_5492.png',
                     contentType: 'image/jpeg' // hoặc 'image/png' nếu ảnh PNG

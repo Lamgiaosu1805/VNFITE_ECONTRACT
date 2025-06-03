@@ -29,13 +29,10 @@ const HopDongController = {
                 headers: {
                     Authorization: 'Bearer ' + userTokenVNPT
                 },
-                responseType: 'stream'
+                responseType: 'arraybuffer'
             })
-            const chunks = [];
-            for await (const chunk of response.data) {
-                chunks.push(chunk);
-            }
-            const pdfBuffer = Buffer.concat(chunks);
+            
+            const pdfBuffer = Buffer.from(response.data);
 
             // SETUP FORM-DATA
             const files = req.files;       

@@ -33,6 +33,8 @@ const HopDongController = {
             })
             
             const pdfBuffer = Buffer.from(response.data);
+            const sizeInMB = (pdfBuffer.length / (1024 * 1024)).toFixed(2);
+            console.log(`📄 Kích thước PDF: ${sizeInMB} MB`);
 
             // SETUP FORM-DATA
             const files = req.files;       

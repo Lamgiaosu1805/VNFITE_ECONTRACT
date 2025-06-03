@@ -33,24 +33,7 @@ const HopDongController = {
             })
             
             const pdfBuffer = Buffer.from(response.data);
-            const sizeInMB = (pdfBuffer.length / (1024 * 1024)).toFixed(2);
-            const pdfParse = require('pdf-parse');
-
-// Giả sử bạn đã có biến pdfBuffer
-pdfParse(pdfBuffer).then(data => {
-    console.log("📄 Metadata PDF:");
-    console.log({
-        numPages: data.numpages,
-        numRendered: data.numrender,
-        info: data.info,             // metadata: title, author, subject, etc.
-        metadata: data.metadata,     // XMP metadata nếu có
-        version: data.version,       // PDF spec version
-        textLength: data.text.length // độ dài của text
-    });
-}).catch(err => {
-    console.error("❌ Lỗi phân tích PDF:", err);
-});
-
+            
             // SETUP FORM-DATA
             const files = req.files;       
             const fields = ''

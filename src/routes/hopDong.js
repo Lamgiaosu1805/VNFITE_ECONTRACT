@@ -4,6 +4,7 @@ const auth = require('../middlewares/auth');
 const ipFilterMiddleware = require('../middlewares/ipWhitelist');
 const LoaiHopDongController = require('../controllers/LoaiHopDongController')
 const upload = require('../middlewares/uploadMiddleware');
+const convertToJpg = require('../middlewares/convertToJPG');
 
 const router = express.Router();
  
@@ -11,7 +12,7 @@ router.post('/renderHDPreview', auth.verifyTokenPartner, upload.fields([
     { name: 'portrait', maxCount: 1 },
     { name: 'cccd_front', maxCount: 1 },
     { name: 'cccd_back', maxCount: 1 },
-]), HopDongController.renderHD);
+]), convertToJpg, HopDongController.renderHD);
 router.post('/kyHopDong', auth.verifyTokenPartner, HopDongController.kyHopDong);
 router.post('/validateOTP', auth.verifyTokenPartner, HopDongController.validateOTP);
 router.post('/renderHDPreview', auth.verifyTokenPartner, HopDongController.renderHD);

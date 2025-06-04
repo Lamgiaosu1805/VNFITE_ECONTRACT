@@ -86,17 +86,17 @@ const HopDongController = {
             });
             formData.append('EKYC_CHANDUNG', files.portrait[0].buffer, {
                 filename: files.portrait[0].originalname,
-                contentType: "image/jpeg"
+                contentType: files.portrait[0].mimetype
             });
           
             formData.append('EKYC_MATTRUOC', files.cccd_front[0].buffer, {
                 filename: files.cccd_front[0].originalname,
-                contentType: "image/jpeg"
+                contentType: files.cccd_front[0].mimetype
             });
           
             formData.append('EKYC_MATSAU', files.cccd_back[0].buffer, {
                 filename: files.cccd_back[0].originalname,
-                contentType: "image/jpeg"
+                contentType: files.cccd_back[0].mimetype
             });
             formData.append('fields', JSON.stringify(fields));
             formData.append('customer', JSON.stringify(customer));

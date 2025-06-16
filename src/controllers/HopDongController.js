@@ -8,6 +8,16 @@ const fs = require('fs');
 const HopDongModel = require("../models/HopDongModel");
 const { processHopDongChuaTai } = require("../services/contract");
 
+function generateRandomString(length = 3) {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * chars.length);
+      result += chars[randomIndex];
+    }
+    return result;
+}
+
 const HopDongController = {
     renderHD: async (req, res) => {
         console.log("request body: ", req.body)
@@ -41,7 +51,7 @@ const HopDongController = {
             const files = req.files;       
             const fields = ''
             const customer = {
-                username: soDienThoai,
+                username: soDienThoai + generateRandomString(),
                 userType: "CONSUMER",
                 sdt: soDienThoai,
                 email: email,

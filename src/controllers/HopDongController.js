@@ -54,7 +54,7 @@ const HopDongController = {
                 username: soDienThoai + generateRandomString(),
                 userType: "CONSUMER",
                 sdt: soDienThoai,
-                email: email,
+                email: email.toLowerCase(),
                 hoten: fullname,
                 sogiayto: cccd,
                 ngaySinh: ngaySinh, //dạng dd/mm/yyyy

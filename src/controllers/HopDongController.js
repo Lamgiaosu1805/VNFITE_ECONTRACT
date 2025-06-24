@@ -163,7 +163,7 @@ const HopDongController = {
             const dataHopDong = JSON.parse(await redis.get(`econtract:${soDienThoai}:${cccd}`))
             const thirdPartyTokenVNPT = await redis.get('tokenThirdPartyVnpt:TIKLUY')
             if(!dataHopDong) {
-                return res.json(FailureResponse("11", "Hợp đồng không tồn tại"))
+                return res.status(400).json(FailureResponse("11", "Hợp đồng không tồn tại"))
             }
             try {
                 const responseGuiHD = await axios.post(`${process.env.HOST_VNPT_ECONTRACT}/esolution-service/contracts/${dataHopDong.contractId}/submit-contract`, null, {
@@ -203,7 +203,7 @@ const HopDongController = {
             }))
         } catch (error) {
             console.log(error.response?.data || error)
-            res.json(FailureResponse("11", error.response?.data || error))
+            res.status(400).json(FailureResponse("11", error.response?.data || error))
         }
     },
     validateOTP: async (req, res) => {
@@ -294,15 +294,15 @@ const HopDongController = {
                     }))
                 }
                 else {
-                    res.json(FailureResponse("12", "Có lỗi khi tạo hợp đồng"))
+                    res.status(400).json(FailureResponse("12", "Có lỗi khi tạo hợp đồng"))
                     console.log(responseSign.data)
                 }
             } else {
-                res.json(FailureResponse("12", "OTP Không tồn tại"))
+                res.status(400).json(FailureResponse("12", "OTP Không tồn tại"))
             }
         } catch (error) {
             console.log(error.response?.data || error)
-            res.json(FailureResponse("12", error.response?.data || error))
+            res.status(400).json(FailureResponse("12", error.response?.data || error))
         }
     },
     taiHopDong: async (req, res) => {

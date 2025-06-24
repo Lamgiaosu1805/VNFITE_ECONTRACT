@@ -302,7 +302,7 @@ const HopDongController = {
             }
         } catch (error) {
             console.log(error.response?.data || error)
-            res.json(FailureResponse("12", error.response?.data || error))
+            res.json(FailureResponse("12", JSON.stringify(error.response?.data) || JSON.stringify(error)))
         }
     },
     taiHopDong: async (req, res) => {

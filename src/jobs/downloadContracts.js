@@ -2,7 +2,7 @@ const cron = require("node-cron");
 const { processHopDongChuaTai } = require("../services/contract");
 
 module.exports = () => {
-    cron.schedule("*/5 * * * *", async () => {
+    cron.schedule("58 23 * * *", async () => {
         const now = new Date().toLocaleString("vi-VN", {
             timeZone: "Asia/Ho_Chi_Minh",
             hour12: false,

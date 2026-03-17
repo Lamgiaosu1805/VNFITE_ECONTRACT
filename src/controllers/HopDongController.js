@@ -12,8 +12,8 @@ function generateRandomString(length = 3) {
     const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
     for (let i = 0; i < length; i++) {
-      const randomIndex = Math.floor(Math.random() * chars.length);
-      result += chars[randomIndex];
+        const randomIndex = Math.floor(Math.random() * chars.length);
+        result += chars[randomIndex];
     }
     return result;
 }
@@ -24,7 +24,7 @@ const HopDongController = {
         try {
             const userTokenVNPT = await redis.get('tokenUserVnpt:TIKLUY')
             const thirdPartyTokenVNPT = await redis.get('tokenThirdPartyVnpt:TIKLUY')
-            const {templateId, fullname, cccd, hoKhauThuongTru, diaChiHienTai, soDienThoai, ngayKy, thangKy, namKy, email, ngaySinh, gioiTinh, ngayCapCCCD, noiCap} = req.body
+            const { templateId, fullname, cccd, hoKhauThuongTru, diaChiHienTai, soDienThoai, ngayKy, thangKy, namKy, email, ngaySinh, gioiTinh, ngayCapCCCD, noiCap } = req.body
             const response = await axios.post(`${process.env.HOST_VNPT_ECONTRACT}/template-service/api/templates/${templateId}/render`, {
                 "${fullname}": fullname,
                 "${cccd}": cccd,
@@ -48,13 +48,13 @@ const HopDongController = {
             const pdfBuffer = Buffer.concat(chunks);
 
             // SETUP FORM-DATA
-            const files = req.files;       
+            const files = req.files;
             const fields = ''
             const customer = {
                 username: soDienThoai + generateRandomString(),
                 userType: "CONSUMER",
                 sdt: soDienThoai,
-                email: email.toLowerCase(),
+                email: email.toLowerCase().trim(),
                 hoten: fullname,
                 sogiayto: cccd,
                 ngaySinh: ngaySinh, //dạng dd/mm/yyyy
@@ -98,12 +98,12 @@ const HopDongController = {
                 filename: files.portrait[0].originalname,
                 contentType: files.portrait[0].mimetype
             });
-          
+
             formData.append('EKYC_MATTRUOC', files.cccd_front[0].buffer, {
                 filename: files.cccd_front[0].originalname,
                 contentType: files.cccd_front[0].mimetype
             });
-          
+
             formData.append('EKYC_MATSAU', files.cccd_back[0].buffer, {
                 filename: files.cccd_back[0].originalname,
                 contentType: files.cccd_back[0].mimetype
@@ -111,7 +111,7 @@ const HopDongController = {
             formData.append('fields', JSON.stringify(fields));
             formData.append('customer', JSON.stringify(customer));
             formData.append('contract', JSON.stringify(contract));
-            
+
             const responseTaoHD = await axios.post(`${process.env.HOST_VNPT_ECONTRACT}/esolution-service/contracts/create-draft-from-file-and-identification-v2`,
                 formData,
                 {
@@ -120,7 +120,7 @@ const HopDongController = {
                     }
                 }
             )
-            
+
             const data = {
                 userId: responseTaoHD.data.object.partnerId,
                 contractId: responseTaoHD.data.object.contractId,
@@ -137,7 +137,7 @@ const HopDongController = {
     },
     getChiTietHD: async (req, res) => {
         try {
-            const {templateId} = req.params
+            const { templateId } = req.params
             const userTokenVNPT = await redis.get('tokenUserVnpt:TIKLUY')
             const response = await axios.get(`${process.env.HOST_VNPT_ECONTRACT}/template-service/api/templates/v1/${templateId}/all-config`, {
                 headers: {
@@ -157,12 +157,12 @@ const HopDongController = {
             res.json(FailureResponse("10", error))
         }
     },
-    kyHopDong: async(req, res) => {
+    kyHopDong: async (req, res) => {
         try {
-            const {cccd, soDienThoai} = req.body
+            const { cccd, soDienThoai } = req.body
             const dataHopDong = JSON.parse(await redis.get(`econtract:${soDienThoai}:${cccd}`))
             const thirdPartyTokenVNPT = await redis.get('tokenThirdPartyVnpt:TIKLUY')
-            if(!dataHopDong) {
+            if (!dataHopDong) {
                 return res.status(400).json(FailureResponse("11", "Hợp đồng không tồn tại"))
             }
             try {
@@ -208,7 +208,7 @@ const HopDongController = {
     },
     validateOTP: async (req, res) => {
         try {
-            const {otp, soDienThoai, cccd} = req.body
+            const { otp, soDienThoai, cccd } = req.body
             const dataSSO = JSON.parse(await redis.get(`econtract:${soDienThoai}:${cccd}:dataSSO`))
             console.log(otp)
             const responseValidateOTP = await axios.post(`${process.env.HOST_VNPT_ECONTRACT}/esignature-service/esign/${dataSSO.idSign}/verify`, {
@@ -219,7 +219,7 @@ const HopDongController = {
                 }
             })
             const data = responseValidateOTP.data
-            if(data.status == "OK") {
+            if (data.status == "OK") {
                 const multiSign = [
                     {
                         "pageSign": 17,
@@ -249,7 +249,7 @@ const HopDongController = {
                         responseType: 'stream'
                     }
                 )
-                if(responseSign.status == 200) {
+                if (responseSign.status == 200) {
                     const newHopDong = new HopDongModel({
                         cccd: cccd,
                         soDienThoai: soDienThoai,
@@ -275,7 +275,7 @@ const HopDongController = {
                     });
                     formData.append('data', JSON.stringify(data));
                     console.log(`${process.env.HOST_VNPT_ECONTRACT}/esolution-service/contracts/${dataSSO.contractId}/digital-sign`, "ID HĐ")
-                    const responseUpdateSign = await axios.post(`${process.env.HOST_VNPT_ECONTRACT}/esolution-service/contracts/${dataSSO.contractId}/digital-sign`, 
+                    const responseUpdateSign = await axios.post(`${process.env.HOST_VNPT_ECONTRACT}/esolution-service/contracts/${dataSSO.contractId}/digital-sign`,
                         formData,
                         {
                             headers: {
@@ -316,9 +316,9 @@ const HopDongController = {
     },
     showHopDong: async (req, res) => {
         try {
-            const {cccd, sdt} = req.body
-            const hopDong = await HopDongModel.findOne({cccd, soDienThoai: sdt, idLoaiHopDong: "682fd19c2a1664686b259b29"}).sort({ createdAt: -1 })
-            if(hopDong) {
+            const { cccd, sdt } = req.body
+            const hopDong = await HopDongModel.findOne({ cccd, soDienThoai: sdt, idLoaiHopDong: "682fd19c2a1664686b259b29" }).sort({ createdAt: -1 })
+            if (hopDong) {
                 const response = await axios.get(`https://service.vnfite.com.vn/file-manager/v2/file/${hopDong.idFile}`, {
                     responseType: 'stream'
                 })
